@@ -8,13 +8,28 @@
 
 
 let displaySize = 30;   // how many pixels are visible in the game
-let pixelSize = 20;     // how big each 'pixel' looks on screen
+let pixelSize = 30;     // how big each 'pixel' looks on screen
+let floorWidth = 6;
 
-let playerOne;    // Adding 2 players to the game
-let playerTwo;
+let CStone;
+let CBroom;
 let target;       // and one target for players to catch.
 
+let STONE_POS = 1;
+let STONE_COLOR = [250, 208, 34];
+let TARGET_POS = 25;
+// let TARGET_COLOR = [38, 41, 77];
+let INIT_FLOOR_COLOR = [253, 241, 240];
+let RED_COLOR = [[245, 146, 193], [255, 122, 154]];
+let BLUE_COLOR = [[157, 174, 234], [157, 174, 234]]
+let FLOOR_COLOR_NUM = 255;
+let DATA;
+
 let display;      // Aggregates our final visual output before showing it on the screen
+
+let SerialCtrl1;
+let SerialCtrl2;
+let SerialCtrl3;
 
 let controller;   // This is where the state machine and game logic lives
 
@@ -22,39 +37,50 @@ let collisionAnimation;   // Where we store and manage the collision animation
 
 let score;        // Where we keep track of score and winner
 
-
-
+  
 function setup() {
 
-  createCanvas((displaySize*pixelSize), pixelSize);     // dynamically sets canvas size
+  createCanvas((displaySize*pixelSize), pixelSize*floorWidth);     // dynamically sets canvas size
 
-  display = new Display(displaySize, pixelSize);        //Initializing the display
+  display = new Display(displaySize, pixelSize, null);        //Initializing the display
+  
+  CStone = new Stone(color(STONE_COLOR), (STONE_POS*pixelSize), (displaySize*pixelSize));
+  CBroom = new Broom();
 
-  playerOne = new Player(color(255,0,0), parseInt(random(0,displaySize)), displaySize);   // Initializing players
-  playerTwo = new Player(color(0,0,255), parseInt(random(0,displaySize)), displaySize);
+  SerialCtrl1 = new SerialController('/dev/tty.usbmodemHIDPC1')
+  // SerialCtrl1 = new SerialController('/dev/tty.usbmodem4')
+  SerialCtrl1.init_controller()
 
-  target = new Player(color(255,255,0), parseInt(random(0,displaySize)), displaySize);    // Initializing target using the Player class 
+  SerialCtrl2 = new SerialController('/dev/tty.usbmodem3')
+  // SerialCtrl2 = new SerialController('/dev/tty.usbmodemHIDPC1')
+  SerialCtrl2.init_controller()
 
-  collisionAnimation = new Animation();     // Initializing animation
+  SerialCtrl3 = new p5.SerialPort();
+  SerialCtrl3.open('/dev/tty.usbmodem2101');  // Replace with your own serial port
+
+  // Optional: Callback for when the serial port is opened
+  SerialCtrl3.on('open', () => {
+    console.log('Serial Port Open');
+  });
 
   controller = new Controller();            // Initializing controller
 
-  score = {max:3, winner:color(0,0,0)};     // score stores max number of points, and color 
+  
 
 }
 
 function draw() {
 
   // start with a blank screen
-  background(0, 0, 0);    
-
   // Runs state machine at determined framerate
   controller.update();
 
-  // After we've updated our states, we show the current one 
-  display.show();
-
 
 }
+
+
+
+
+
 
 
